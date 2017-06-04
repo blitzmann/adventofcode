@@ -13,6 +13,7 @@ for x in triangles:
 print i
 
 # Part 2
+# I start by doing the same thing as part one, but then I stuff all the numbers into a single list, and then chunk it
 triangles_tmp = []
 
 with open("input.txt", "r") as ins:
