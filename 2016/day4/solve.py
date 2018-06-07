@@ -27,7 +27,7 @@ with open("input.txt", "r") as ins:
         newCheck = ''.join(x[0] for x in freq[0:len(check)])
 
         if check == newCheck:
-            print ''.join(chr(getOrd(char, sector%26)) for char in '-'.join(data)), sector
+            print(''.join(chr(getOrd(char, sector%26)) for char in '-'.join(data)), sector)
             i += sector
 
-print i
+print(i)

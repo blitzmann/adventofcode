@@ -10,7 +10,7 @@ for x in triangles:
     maxVal = x.pop(x.index(max(x)))
     i += 1 if maxVal < sum(x) else 0
 
-print i
+print(i)
 
 # Part 2
 # I start by doing the same thing as part one, but then I stuff all the numbers into a single list, and then chunk it
@@ -25,11 +25,11 @@ for x, _ in enumerate(triangles_tmp[0]):
     numbers.extend([row[x] for row in triangles_tmp])
 
 # https://stackoverflow.com/a/312464/788054
-triangles = [numbers[i:i + 3] for i in xrange(0, len(numbers), 3)]
+triangles = [numbers[i:i + 3] for i in range(0, len(numbers), 3)]
 
 i = 0
 for x in triangles:
     maxVal = x.pop(x.index(max(x)))
     i += 1 if maxVal < sum(x) else 0
 
-print i
+print(i)

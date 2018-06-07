@@ -26,9 +26,9 @@ for x in input:
     elif direction % 4 == 2: # y axis decreasing
         point[1] -= int(x[1:])
 
-print abs(point[0]) + abs(point[1])
+print(abs(point[0]) + abs(point[1]))
 
-print "=" * 20
+print("=" * 20)
 
 # Part 2
 
@@ -39,7 +39,7 @@ def findPoints(input):
     for x in input:
         direction += 1 if x[0] == 'R' else -1
 
-        for y in xrange(int(x[1:])):
+        for y in range(int(x[1:])):
             point = list(points[-1])
 
             if direction % 4 == 1:  # x axis is being increased
@@ -59,4 +59,4 @@ def findPoints(input):
             points.append(point)
 
 point = findPoints(input)
-print abs(point[0]) + abs(point[1])
+print(abs(point[0]) + abs(point[1]))

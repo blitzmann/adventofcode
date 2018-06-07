@@ -33,6 +33,7 @@ def checkPoint(x, y):
     except:
         return False
 
+
 for i, l in enumerate(input):
     for c in input[i]:
         if c == "U" and checkPoint(x + 1, y):
@@ -46,9 +47,9 @@ for i, l in enumerate(input):
 
     presses.append(str(keypad[x][y]))
 
-print ''.join(presses)
+print(''.join(presses))
 
-print "="*20
+print("="*20)
 
 # Part 2
 
@@ -65,6 +66,7 @@ x = 2
 y = 0
 
 presses = []
+
 
 def checkPoint(x, y):
     if x < 0 or y < 0:  # to prevent index wrapping
@@ -91,4 +93,4 @@ for i, l in enumerate(input):
 
     presses.append(str(keypad[x][y]))
 
-print ''.join(presses)
+print(''.join(presses))

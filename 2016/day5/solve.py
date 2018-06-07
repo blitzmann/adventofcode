@@ -12,10 +12,10 @@ while len(password) != 8:
 
     i += 1
 
-print password
+print(password)
 
 # Part 2
-print "="*20
+print("="*20)
 
 password = list('________')
 i = 0
@@ -31,4 +31,4 @@ while '_' in password:
 
     i += 1
 
-print ''.join(password)
+print(''.join(password))
