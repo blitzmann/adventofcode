@@ -13,7 +13,7 @@ def hasABBA(s):
 with open('input.txt', 'r') as file:
     for line in file:
         line = line.strip()
-        regex = ur"\[(.*?)\]"
+        regex = r"\[(.*?)\]"
         brackets = re.findall(regex, line)
 
         for x in brackets:
@@ -26,9 +26,9 @@ with open('input.txt', 'r') as file:
                     ips.append(line)
                     break
 
-print len(ips)
+print(len(ips))
 
-print "="*200
+print("="*200)
 
 # Part 2
 
@@ -55,7 +55,7 @@ def searchABA(s, babs):
 with open('input.txt', 'r') as file:
     for line in file:
         line = line.strip()
-        regex = ur"\[(.*?)\]"
+        regex = r"\[(.*?)\]"
         brackets = re.findall(regex, line)
 
         babs = []
@@ -68,4 +68,4 @@ with open('input.txt', 'r') as file:
                 ips.append(line)
                 break
 
-print len(ips)
+print(len(ips))

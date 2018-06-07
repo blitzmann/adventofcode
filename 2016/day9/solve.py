@@ -27,8 +27,8 @@ while i < len(s):
         decompress += c
         i += 1
 
-print decompress
-print len(s), len(decompress)
+print(decompress)
+print(len(s), len(decompress))
 
 # Part 2
 #    01234567890123456789
@@ -65,4 +65,4 @@ while i < len(s):
         decompress += c
         i += 1
 
-print decompressLen
+print(decompressLen)
