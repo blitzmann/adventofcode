@@ -141,7 +141,12 @@ while keep_going:
         calc_new_direction(cart)
         # check if cart's position is same as any other carts position
         if cart.position in [c.position for c in carts if cart != c]:
-            print(cart.position)
-            keep_going = False
-            break
+
+            print("Crash! {}".format(cart.position))
+            carts = list(filter(lambda c: c.position != cart.position, carts))
+
+    if len(carts) == 1:
+        print("Last cart! {}".format(carts[0].position))
+        keep_going = False
+
     # print_map()
