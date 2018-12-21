@@ -6,8 +6,9 @@ from enum import IntEnum, unique
 class BlockType(IntEnum):
     SAND = 0,
     WATER = 1,
-    SOURCE = 2
-    CLAY = 3,
+    STANDING_WATER = 2
+    SOURCE = 3
+    CLAY = 4,
 
 clay_positions = set()
 
@@ -36,6 +37,10 @@ def convert_point_to_index(point):
         pass
     return (point[1], point[0]-min_x)
 
+def convert_index_to_point(index):
+    """converts point to array index"""
+    return (index[1]+min_x, index[1])
+
 matrix = numpy.full((max_y+1, (max_x-min_x)+1), BlockType.SAND)
 
 for clay in clay_positions:
@@ -45,34 +50,114 @@ for clay in clay_positions:
         print(clay)
         pass
     matrix[y, x] = BlockType.CLAY
+
+matrix[6, 9] = BlockType.CLAY
+
+# matrix[6, 2] = BlockType.CLAY
+matrix[7, 2] = BlockType.SAND
+matrix[7, 5] = BlockType.SAND
+
+def search_left(y, x):
+    sub_left = matrix[y:y + 2, :x]
+
+    offset = 0
+    for slice in numpy.flip(matrix[y:y+ 2, :x].T, 0):
+        offset += 1
+        if slice[0] in (BlockType.CLAY, BlockType.STANDING_WATER):
+            matrix[y, x-offset+1 : x] = BlockType.STANDING_WATER
+            return matrix[y, x-offset]
+
+        if slice[1] == BlockType.SAND:
+            matrix[y, x-offset] = BlockType.SOURCE
+            matrix[y, x - offset+1: x] = BlockType.WATER  # flowing water to the source
+            # we have found an opening below us, start the source
+            source((y, x-offset))
+
+
+def search_right(y, x):
+    sub_right = matrix[y:y + 2, x+1:]
+
+    offset = 0
+    for slice in sub_right.T:
+        offset += 1
+        if slice[0] in (BlockType.CLAY, BlockType.STANDING_WATER):
+            matrix[y, x:x + offset] = BlockType.STANDING_WATER
+            return matrix[y, x+offset]
+
+        if slice[1] == BlockType.SAND:
+            matrix[y, x+offset] = BlockType.SOURCE
+            matrix[y, x:x + offset] = BlockType.WATER  # flowing water to the source
+            # we have found an opening below us, start the source
+            source((y, x+offset))
+
+
 def source(point):
+    thing  = matrix
     """the start of calculations. A source of water is defines at a point in which water starts to flow downwards"""
-    # set this block as the source
-    # find the first block directly under the source
-    matrix[convert_point_to_index(point)] = BlockType.SOURCE
-    # return source(point)
+    y, x = point
+    matrix[y, x] = BlockType.SOURCE  # set this point as a source block
 
-source((500, 0))
-print(matrix)
+    # find next clay block
+    offset = 1
+    while True:
+        if y + offset > max_y:
+             return
+        cell = matrix[y + offset, x]
+        if cell in (BlockType.CLAY, BlockType.STANDING_WATER):
+            break
+        matrix[y + offset, x] = BlockType.WATER
+        offset += 1
 
+    # we have found the bottom of the flow
+    for going_up in reversed(range(y+1, y+offset)):
+        # now we traverse up the flow, finding the left and right bounds
+        right_result = search_right(going_up, x)
+        left_result = search_left(going_up, x)
+        # todo: fill in the water if we need to (either with )
+        # todo: once we reach anoth source of water, stop the propogation upwards (unless the source is within a basin?)
 
+    #
+    # matrix[y+1:y+offset, x] = BlockType.WATER  # set this point as a source block
+    #
+    #
+    # column_slice = matrix[y+1:, x]
+    #
+    # for slice in numpy.nditer(column_slice):
+    #     print(slice)
+    #     print(matrix[slice])
+    #
+    # blocking_index = numpy.argmax(column_slice > BlockType.SAND)
+    #
+    # # set all blocks traversed to water
+    # matrix[y+1:blocking_index+1, x] = BlockType.WATER # set this point as a source block
+    #
+    # # track water left and right
+    #
+    # pass
+    #
+    # # return source(point)
 
-def print_slice():
+source(convert_point_to_index((499, 0)))
+# print(matrix)
 
-
-    def char(pos):
-        if pos == (500, 0):
-            return '+'
-        if pos in clay_positions:
-            return '#'
-        return '.'
-
-    for y in range(0, max_y+1):
-        print(''.join([char((x, y)) for x in range(min_x-1, max_x+2)]))
-
-
-
-print_slice()
+pass
+#
+# def print_slice():
+#
+#
+#     def char(pos):
+#         if pos == (500, 0):
+#             return '+'
+#         if pos in clay_positions:
+#             return '#'
+#         return '.'
+#
+#     for y in range(0, max_y+1):
+#         print(''.join([char((x, y)) for x in range(min_x-1, max_x+2)]))
+#
+#
+#
+# print_slice()
 #
 # def calc_new_direction(cart):
 #     cart.position = tuple(sum(x) for x in zip(cart.position, new_direction_mapping[cart.direction]))
