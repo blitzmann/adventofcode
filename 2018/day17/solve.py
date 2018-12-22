@@ -51,11 +51,23 @@ for clay in clay_positions:
         pass
     matrix[y, x] = BlockType.CLAY
 
-matrix[6, 9] = BlockType.CLAY
+# matrix[6, 9] = BlockType.CLAY
+#
+# # matrix[6, 2] = BlockType.CLAY
+# matrix[7, 2] = BlockType.SAND
+# matrix[7, 5] = BlockType.SAND
+#
+# matrix[9, 9] = BlockType.CLAY
 
-# matrix[6, 2] = BlockType.CLAY
-matrix[7, 2] = BlockType.SAND
-matrix[7, 5] = BlockType.SAND
+
+# 1570,147
+#
+# 1648, 19 keeps going right
+#
+# 1628, 11 - start of issue?
+#
+#
+# 1608, 25
 
 def search_left(y, x):
     sub_left = matrix[y:y + 2, :x]
@@ -71,11 +83,18 @@ def search_left(y, x):
             matrix[y, x-offset] = BlockType.SOURCE
             matrix[y, x - offset+1: x] = BlockType.WATER  # flowing water to the source
             # we have found an opening below us, start the source
-            source((y, x-offset))
+            keep_going = source((y, x-offset))
+            if not keep_going:
+                return None
+    else:
+        # we've reached the left bounds without hitting a wall or being able to fall. Mark the blocks as traversed
+        matrix[y, x - offset: x] = BlockType.WATER
 
 
 def search_right(y, x):
     sub_right = matrix[y:y + 2, x+1:]
+    if y == 1570:
+        print (y, x)
 
     offset = 0
     for slice in sub_right.T:
@@ -88,7 +107,11 @@ def search_right(y, x):
             matrix[y, x+offset] = BlockType.SOURCE
             matrix[y, x:x + offset] = BlockType.WATER  # flowing water to the source
             # we have found an opening below us, start the source
-            source((y, x+offset))
+            keep_going = source((y, x+offset))
+            if not keep_going:
+                return None
+    else:
+        matrix[y, x:x + offset+1] = BlockType.WATER
 
 
 def source(point):
@@ -96,7 +119,8 @@ def source(point):
     """the start of calculations. A source of water is defines at a point in which water starts to flow downwards"""
     y, x = point
     matrix[y, x] = BlockType.SOURCE  # set this point as a source block
-
+    if point == (1608, 25):
+        print(point)
     # find next clay block
     offset = 1
     while True:
@@ -105,14 +129,20 @@ def source(point):
         cell = matrix[y + offset, x]
         if cell in (BlockType.CLAY, BlockType.STANDING_WATER):
             break
+
         matrix[y + offset, x] = BlockType.WATER
         offset += 1
 
     # we have found the bottom of the flow
-    for going_up in reversed(range(y+1, y+offset)):
+    for going_up in reversed(range(y, y+offset)):
+        if going_up == y:
+            return True
         # now we traverse up the flow, finding the left and right bounds
         right_result = search_right(going_up, x)
         left_result = search_left(going_up, x)
+        if left_result is None or right_result is None:
+            break
+        pass
         # todo: fill in the water if we need to (either with )
         # todo: once we reach anoth source of water, stop the propogation upwards (unless the source is within a basin?)
 
@@ -138,8 +168,11 @@ def source(point):
     # # return source(point)
 
 source(convert_point_to_index((499, 0)))
-# print(matrix)
 
+#source((1628,11))
+
+# print(matrix)
+print (len(matrix[numpy.where(matrix==BlockType.WATER)])+len(matrix[numpy.where(matrix==BlockType.SOURCE)])+len(matrix[numpy.where(matrix==BlockType.STANDING_WATER)])-min_y)
 pass
 #
 # def print_slice():
@@ -149,7 +182,7 @@ pass
 #         if pos == (500, 0):
 #             return '+'
 #         if pos in clay_positions:
-#             return '#'
+#             return '#'len(matrix[numpy.where(matrix =)])
 #         return '.'
 #
 #     for y in range(0, max_y+1):
