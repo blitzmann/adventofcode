@@ -73,45 +73,41 @@ def search_left(y, x):
     sub_left = matrix[y:y + 2, :x]
 
     offset = 0
-    for slice in numpy.flip(matrix[y:y+ 2, :x].T, 0):
+    for slice in numpy.flip(sub_left.T, 0):
         offset += 1
         if slice[0] in (BlockType.CLAY, BlockType.STANDING_WATER):
-            matrix[y, x-offset+1 : x] = BlockType.STANDING_WATER
-            return matrix[y, x-offset]
+            return BlockType.CLAY, x-offset+1
 
         if slice[1] == BlockType.SAND:
             matrix[y, x-offset] = BlockType.SOURCE
-            matrix[y, x - offset+1: x] = BlockType.WATER  # flowing water to the source
             # we have found an opening below us, start the source
             keep_going = source((y, x-offset))
             if not keep_going:
-                return None
+                return BlockType.SOURCE, x - offset+1
     else:
+        return None, x - offset
         # we've reached the left bounds without hitting a wall or being able to fall. Mark the blocks as traversed
-        matrix[y, x - offset: x] = BlockType.WATER
 
 
 def search_right(y, x):
+    # get slice from where we are, all the way to the end
     sub_right = matrix[y:y + 2, x+1:]
-    if y == 1570:
-        print (y, x)
+    if y == 1628:
+        print(y, x)
 
     offset = 0
     for slice in sub_right.T:
         offset += 1
         if slice[0] in (BlockType.CLAY, BlockType.STANDING_WATER):
-            matrix[y, x:x + offset] = BlockType.STANDING_WATER
-            return matrix[y, x+offset]
+            return BlockType.CLAY, x+offset
 
         if slice[1] == BlockType.SAND:
-            matrix[y, x+offset] = BlockType.SOURCE
-            matrix[y, x:x + offset] = BlockType.WATER  # flowing water to the source
             # we have found an opening below us, start the source
             keep_going = source((y, x+offset))
             if not keep_going:
-                return None
+                return BlockType.SOURCE, x+offset
     else:
-        matrix[y, x:x + offset+1] = BlockType.WATER
+        return None, x+offset+1
 
 
 def source(point):
@@ -137,10 +133,18 @@ def source(point):
     for going_up in reversed(range(y, y+offset)):
         if going_up == y:
             return True
+        if going_up == 1628:
+            print("dda")
         # now we traverse up the flow, finding the left and right bounds
-        right_result = search_right(going_up, x)
-        left_result = search_left(going_up, x)
-        if left_result is None or right_result is None:
+        right_result, right_bound = search_right(going_up, x)
+        left_result, left_bound = search_left(going_up, x)
+
+        if right_result == BlockType.CLAY and left_result == BlockType.CLAY:
+            matrix[going_up, left_bound:right_bound] = BlockType.STANDING_WATER
+        else:
+            matrix[going_up, left_bound:right_bound] = BlockType.WATER
+
+        if left_result == BlockType.SOURCE or right_result == BlockType.SOURCE:
             break
         pass
         # todo: fill in the water if we need to (either with )
