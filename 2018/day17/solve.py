@@ -35,13 +35,14 @@ def convert_point_to_index(point):
     """converts point to array index"""
     if point[0] == min_x:
         pass
-    return (point[1], point[0]-min_x)
+    return point[1], point[0] - min_x+1
 
 def convert_index_to_point(index):
     """converts point to array index"""
-    return (index[1]+min_x, index[1])
+    return index[1] + min_x, index[1]
 
-matrix = numpy.full((max_y+1, (max_x-min_x)+1), BlockType.SAND)
+# give x a buffer of 1 on either side to allow water running along clay and hitting the edge to fall
+matrix = numpy.full((max_y+1, (max_x-min_x)+1+2), BlockType.SAND)
 
 for clay in clay_positions:
     y, x = convert_point_to_index(clay)
@@ -125,8 +126,7 @@ def source(point):
     for going_up in reversed(range(y, y+offset)):
         if going_up == y:
             return True
-        if going_up == 1628:
-            print("dda")
+
         # now we traverse up the flow, finding the left and right bounds
         right_result, right_bound = search_right(going_up, x)
         left_result, left_bound = search_left(going_up, x)
