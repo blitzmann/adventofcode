@@ -145,6 +145,8 @@ sub_matrix = matrix[min_y : , :]
 
 print(len(sub_matrix[numpy.where(sub_matrix==BlockType.WATER)])+len(sub_matrix[numpy.where(sub_matrix==BlockType.SOURCE)])+len(sub_matrix[numpy.where(sub_matrix==BlockType.STANDING_WATER)]))
 
+print(len(sub_matrix[numpy.where(sub_matrix==BlockType.STANDING_WATER)]))
+
 def char(x):
         if x == BlockType.SAND:
             return '.'
