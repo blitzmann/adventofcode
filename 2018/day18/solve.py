@@ -1,4 +1,5 @@
 import hashlib
+from collections import OrderedDict
 state = []
 
 with open("input.txt", "r") as ins:
@@ -35,7 +36,7 @@ def do_minute():
 
     state_str = ''.join([x for sublist in state for x in sublist])
     return new_state, hashlib.sha3_256(state_str.encode('utf-8')).hexdigest(), state_str.count('#') * state_str.count('|')
-from collections import OrderedDict
+
 minute_hashes = OrderedDict()
 
 for _ in range(10):
