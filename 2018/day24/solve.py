@@ -86,7 +86,7 @@ def target_selection():
     # returns a dictionary of which group will target which other group
     ret = OrderedDict()
     groups = [g for g in (infection+immune) if not g.dead]
-    #groups = sorted(groups, key=lambda x: (x.effective_power, x.initiative), reverse=True)
+    groups = sorted(groups, key=lambda x: (x.effective_power, x.initiative), reverse=True)
 
     for g in groups:
         defending_army = infection if g in immune else immune
