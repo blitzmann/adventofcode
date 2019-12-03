@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "advent-of-code": "^4.0.3"
+    "advent-of-code": "^4.0.3",
+    "immutable-tuple": "^0.4.10"
   }
 }
