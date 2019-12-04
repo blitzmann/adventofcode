@@ -6,7 +6,7 @@ const start = 146810,
     results = []
 
 function calculateRules(number) {
-    var parts = (number + start).toString().split('');
+    const parts = (number + start).toString().split('');
     const ret = {
         adjacent: false, // adjacent will be set to true if theres any adjacent digits
         doubles: false, // doubles will be set to true if the number matches the double rule (has at least 1 adjacent pair that isn't part of a larger set)
@@ -15,7 +15,7 @@ function calculateRules(number) {
 
     // Checks for adjacent and doubles
     for (let i = 0; i < parts.length; i++) {
-        var [digit1, digit2, digit3] = [parts[i], parts[i + 1], parts[i + 2]]
+        const [digit1, digit2, digit3] = [parts[i], parts[i + 1], parts[i + 2]]
         if (digit1 === digit2) {
             ret.adjacent = true; // easy
 
@@ -47,9 +47,6 @@ function calculateRules(number) {
     }
 
     return ret
-    if (adjacent && increasing) {
-        count++
-    }
 }
 
 
