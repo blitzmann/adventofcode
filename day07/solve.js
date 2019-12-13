@@ -2,15 +2,11 @@ const fs = require('fs');
 const path = require("path");
 const arr = fs.readFileSync(path.resolve(__dirname, 'input.txt')).toString();
 
-phase = [0, 1, 2, 3, 4]
-
 class IntCode {
-
-    constructor(program, inputs) {
+    constructor(program) {
         this.program = program.split(',').map(Number);
-        this._inputIdx = 0
-        this.inputs = inputs;
         this.outputs = [];
+        this.i = 0;
         this.opFunctions = new Map([
             // Mapping of opcode and the functions that determine their results 
             // These functions return undefined or Integer
@@ -29,8 +25,8 @@ class IntCode {
                 this.program[param3] = value1 * value2;
             }],
             [3, (param1, _) => {
-                this.program[param1] = this.inputs[this._inputIdx];
-                this._inputIdx++;
+                this.program[param1] = this.input;
+                this.input = undefined;
             }],
             [4, (param1, modes) => {
                 const value1 = modes[0] === 1 ? param1 : this.program[param1]
@@ -65,21 +61,34 @@ class IntCode {
                 this.program[param3] = value1 === value2 ? 1 : 0;
             }],
         ]);
+        return this;
+    }
 
-        for (let i = 0; i < this.program.length; i++) {
-            const instruction = this.program[i].toString().split('');
+    get last() {
+        return this.outputs[this.outputs.length - 1]
+    }
+    Run(input) {
+        this.input = input
+
+        while (true) {
+            const instruction = this.program[this.i].toString().split('');
 
             const op = parseInt(instruction.slice(instruction.length - 2).join(''));
             if (op === 99) {
+                return;
+            }
+            if (op === 3 && this.input === undefined) {
                 break;
             }
             const modes = instruction.slice(0, instruction.length - 2).reverse().map(Number)
             const func = this.opFunctions.get(op);
-            var params = this.program.slice(i + 1, i + 1 + (func.length - 1))
+            var params = this.program.slice(this.i + 1, this.i + 1 + (func.length - 1))
 
             // set the next instruction based on return of the function or automatically based on the number of parameters
-            i = (func(...params, modes) - 1) || (i + (func.length - 1));
+            this.i = (func(...params, modes) - 1) || (this.i + (func.length - 1));
+            this.i++
         }
+        return this;
     }
 }
 
@@ -102,36 +111,57 @@ function perm(xs) {
     return ret;
 }
 
-var maxPerm;
-var max = 0;
-for (var phase of perm([0, 1, 2, 3, 4])) {
-    amp1 = new IntCode(arr, [phase[0], 0])
-    amp2 = new IntCode(arr, [phase[1], amp1.outputs[amp1.outputs.length - 1]])
-    amp3 = new IntCode(arr, [phase[2], amp2.outputs[amp2.outputs.length - 1]])
-    amp4 = new IntCode(arr, [phase[3], amp3.outputs[amp3.outputs.length - 1]])
-    amp5 = new IntCode(arr, [phase[4], amp4.outputs[amp4.outputs.length - 1]])
-    var thing = amp5.outputs[amp5.outputs.length - 1]
-    if (thing > max) {
-        max = thing
-        marPerm = phase
+let max = 0;
+for (let phase of perm([0, 1, 2, 3, 4])) {
+    const amps = []
+
+    // initialize amps
+    for (let i of Array(5).keys()) {
+        amps[i] = new IntCode(arr).Run(phase[i])
+    }
+
+    // r will store the previous runs output
+    // For each amp, feed it the previous value
+    let r = 0;
+    for (let amp of amps) {
+        amp.Run(r)
+        r = amp.last
+    }
+
+    if (r > max) {
+        max = r
     }
 }
 
-console.log(max, maxPerm)
+console.log(`Part 1 ${max}`)
 
+// this is done the same way, only we have a loop within the loop that will continue until the program halts
+max = 0; // reset max
+for (let phase of perm([5, 6, 7, 8, 9])) {
 
-  ///
+    const amps = []
+    // initialize amps
+    for (let i of Array(5).keys()) {
+        amps[i] = new IntCode(arr)
+        amps[i].Run(phase[i])
+    }
 
+    let r = 0;
+    // do a while loop until one of them halts
+    for (let i = 0; true; i++) {
+        amp = amps[i % amps.length];
+        ampCont = amp.Run(r);
+        r = amp.last
 
-// for (var x of Array(4).keys()){
-//     console.log(x)
-// }
+        if (i % amps.length === amps.length - 1 && !ampCont) {
+            break
+        }
+    }
 
+    if (r > max) {
+        max = r
+    }
 
-// amp1 = new IntCode(arr, [phase[0], 0])
-// amp2 = new IntCode(arr, [phase[1], amp1.outputs[amp1.outputs.length - 1]])
-// amp3 = new IntCode(arr, [phase[2], amp2.outputs[amp2.outputs.length - 1]])
-// amp4 = new IntCode(arr, [phase[3], amp3.outputs[amp3.outputs.length - 1]])
-// amp5 = new IntCode(arr, [phase[4], amp4.outputs[amp4.outputs.length - 1]])
+}
 
-// console.log(amp5.outputs[amp5.outputs.length - 1])
+console.log(`Part 2 ${max}`)
