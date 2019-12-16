@@ -1,10 +1,8 @@
 
 class IntCode {
     constructor(program) {
-        this.program = program.split(',').map(Number);
-        this.outputs = [];
-        this.i = 0;
-        this.relativeBase = 0;
+        this._orig = program.split(',').map(Number);
+        this.reset();
 
         this.opFunctions = new Map([
             // Mapping of opcode and the functions that determine their results 
@@ -76,6 +74,17 @@ class IntCode {
 
     setValue(param, mode, value){
         this.program[mode === 2 ? this.relativeBase + param : param] = value;
+    }
+
+    clearOutputs(){
+        this.outputs = []
+    }
+
+    reset() {
+        this.program = this._orig;
+        this.outputs = [];
+        this.i = 0;
+        this.relativeBase = 0;
     }
 
     Run(input) {
