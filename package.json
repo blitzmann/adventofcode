@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "advent-of-code": "^4.0.3",
-    "immutable-tuple": "^0.4.10"
+    "immutable-tuple": "^0.4.10",
+    "js-combinatorics": "^0.5.4"
   }
 }
