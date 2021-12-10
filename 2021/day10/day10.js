@@ -1,85 +1,72 @@
 const fs = require("fs");
 const text = (fs.readFileSync("input.txt")).toString();
 
-let scores = new Map([
+let errorScores = new Map([
     [')', 3],
     [']', 57],
     ['}', 1197],
     ['>', 25137],
 ])
 
-let scores2 = new Map([
+let completionScores = new Map([
     [')', 1],
     [']', 2],
     ['}', 3],
     ['>', 4],
 ])
-let compliments = new Map([
+let complimentsRev = new Map([
     [')', '('],
     [']', '['],
     ['}', '{'],
     ['>', '<'],
 ])
-let compliments2 = new Map([
+let compliments = new Map([
     ['(', ')'],
     ['[', ']'],
     ['{', '}'],
     ['<', '>'],
 ])
-input = text.split("\n")
-scoreKeeper = []
-for (let line of input.map(x=>x.split(""))) {
-    let stack = []
-    let corrupted = false;
-    for (let char of line){
-        if (['(','[','{','<'].includes(char)) {
-            stack.push(char);
-        }
-        if ([')',']','}','>'].includes(char)) {
-            let pop = stack.pop()
-            if (compliments.get(char) !== pop){
-                corrupted = true
-                scoreKeeper.push(char)
-                break
+
+class Line {
+    constructor(line) {
+        let stack = []
+        this.corrupted = false;
+        this.errorScore = null;
+        this.completionScore = 0;
+
+        // process the line to check for corruption
+        for (let char of line){
+            if (['(','[','{','<'].includes(char)) {
+                stack.push(char);
             }
+            if ([')',']','}','>'].includes(char)) {
+                if (complimentsRev.get(char) !== stack.pop()){
+                    this.corrupted = true
+                    this.errorScore = errorScores.get(char)
+                    return;
+                }
+            }
+        }        
+
+        // if we're here, the line isn't corrupted, it's just incomplete. Run completion logic
+        let s;
+        while(s=stack.pop()){
+            let next = compliments.get(s)
+            this.completionScore = (this.completionScore * 5) + completionScores.get(next)
         }
     }
 }
 
-console.log(scoreKeeper.map(x=>scores.get(x)).reduce((a,b)=>a+b, 0))
+input = text.split("\n").map(x=>new Line(x))
 
-let part2 = []
-for (let line of input.map(x=>x.split(""))) {
-    let stack = []
-    let corrupted = false;
-    for (let char of line){
-        if (['(','[','{','<'].includes(char)) {
-            stack.push(char);
-        }
-        if ([')',']','}','>'].includes(char)) {
-            let pop = stack.pop()
-            if (compliments.get(char) !== pop){
-                corrupted = true
-                break
-            }
-        }
-    }
+console.log(input
+    .filter(x=>x.corrupted)
+    .map(x=>x.errorScore)
+    .reduce((a, b) => a + b, 0))
 
-    if (corrupted){
-        continue;
-    }
-
-    // find the completion
-    let s;
-    let score = 0;
-    while(s=stack.pop()){
-        let next = compliments2.get(s)
-        score = (score * 5) + scores2.get(next)
-    }
-
-    part2.push(score)
-}
-
-sorted = part2.sort((a,b)=>a-b)
+let sorted = input
+    .filter(x=>!x.corrupted)
+    .map(x=>x.completionScore)
+    .sort((a, b) => a - b);
 console.log(sorted[Math.floor(sorted.length/2)])
 
