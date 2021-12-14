@@ -51,7 +51,19 @@ for (let rule of rules.keys()) {
     tracker.set(rule, count);
 }
 
-// part two stepper
+/**
+ * part two stepper
+ *
+ * For part two, we do something similar to the lanternfish part 2 problem.
+ * Instead of a 100% simulation, we understand that 1 pair will turn into 2 pair.
+ * We can iterate through the different pairs and know what other pairs they
+ * are going to produce.
+ *
+ * To avoid double counting when counting the individual letters, we only take
+ * the first letter from the pair, and then count +1 for the very last character
+ * on the template (since it will never change). This part is done in the step loop
+ * itself.
+ */
 function step2() {
     const tmp = new Map();
     // iterate through all pairs, and then split. Create 2 new pairs and store in a map.
