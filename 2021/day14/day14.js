@@ -69,10 +69,9 @@ function step2() {
     // iterate through all pairs, and then split. Create 2 new pairs and store in a map.
     //  eg: if CB has 3 instances, then we increment CH and HB by 3
     for (let [pair, char] of rules.entries()) {
-        let numOfPair = tracker.get(pair);
+        let numOfPair = tracker.get(pair) || 0;
 
         let pairArr = pair.split("");
-
         tmp.set(
             pairArr[0] + char,
             (tmp.get(pairArr[0] + char) || 0) + numOfPair
@@ -82,52 +81,40 @@ function step2() {
             (tmp.get(char + pairArr[1]) || 0) + numOfPair
         );
     }
-
     // set the tracker to our current iteration
     tracker = tmp;
 }
 
 // loop that runs the steps.
-for (let x = 0; x < 5; x++) {
-    console.log("==========\nStep " + (x + 1));
+for (let x = 0; x < 10; x++) {
     step(); // part 1 step
-    step2(); // part 2 step
-
-    // Part 1 stuff
-    let arr = template.split("");
-    let freq = [...new Set(arr)].map((x) => [
-        arr.filter((y) => x === y).length,
-        x,
-    ]);
-    let max = freq.sort((a, b) => b[0] - a[0])[0][0];
-    let min = freq.sort((a, b) => a[0] - b[0])[0][0];
-
-    console.log("Part 1:", max - min);
-    console.log("Template: ", template);
-
-    // part 2
-
-    var score = new Map();
-    for (let [pair, count] of tracker.entries()) {
-        let char = pair.split("")[0];
-        score.set(char, (score.get(char) || 0) + count);
-    }
-
-    let templateSplit = template.split("");
-
-    let trueCounts = {
-        C: templateSplit.filter((x) => x === "C").length,
-        B: templateSplit.filter((x) => x === "B").length,
-        H: templateSplit.filter((x) => x === "H").length,
-        N: templateSplit.filter((x) => x === "N").length,
-    };
-    let lastChar = templateSplit.reverse()[0];
-    score.set(lastChar, (score.get(lastChar) || 0) + 1);
-
-    console.log("True counts (from part 1):   ", trueCounts);
-    console.log("Scores (from part 2): ", score);
-    console.log("Tracker (from part 2):", tracker);
 }
+
+let arr = template.split("");
+let freq = [...new Set(arr)].map((x) => [arr.filter((y) => x === y).length, x]);
+let max = freq.sort((a, b) => b[0] - a[0])[0][0];
+let min = freq.sort((a, b) => a[0] - b[0])[0][0];
+
+console.log(max - min);
+
+for (let x = 0; x < 40; x++) {
+    step2(); // part 2 step
+}
+
+var score = new Map();
+for (let [pair, count] of tracker.entries()) {
+    let char = pair.split("")[0];
+    score.set(char, (score.get(char) || 0) + count);
+}
+
+let templateSplit = template.split("");
+
+let lastChar = templateSplit.reverse()[0];
+score.set(lastChar, (score.get(lastChar) || 0) + 1);
+
+max = [...score.values()].sort((a, b) => b - a)[0];
+min = [...score.values()].sort((a, b) => a - b)[0];
+console.log(max - min);
 
 // CN is broke for step 5, shows 5 but should be 6
 // CN can be created via HN, NN, CN (for the second)  and CC for the first
