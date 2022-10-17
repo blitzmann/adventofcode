@@ -15,7 +15,7 @@ function flashNeighbors(i){
      ]
 
     // not on right bounds
-    if ((i+1) % 10 !== 0) {
+    if ((i+1) % WIDTH !== 0) {
         y = [
             ...y,
             i + WIDTH + 1, // down right
@@ -25,7 +25,7 @@ function flashNeighbors(i){
     }
 
     // not on the left bounds
-    if ((i) % 10 !== 0) {
+    if ((i) % WIDTH !== 0) {
         y = [
             ...y,
             i - WIDTH - 1, // top left
@@ -67,7 +67,7 @@ function printStep() {
         let t;
         if (x === 0){ t = "\x1b[36m"+x.toString()+"\x1b[0m" }
         else { t = x }
-        if ((i + 1) % 10 === 0){ t += "\n" }
+        if ((i + 1) % WIDTH === 0){ t += "\n" }
         return t
     }).join("")
     console.log(t + "\n\n")

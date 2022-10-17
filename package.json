@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "bb26": "^2.2.0",
+    "greedy-number-partitioning": "^0.1.0"
+  }
+}

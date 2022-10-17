@@ -13,22 +13,19 @@ function part1(text) {
 console.log(part1(input));
 
 /// -----------
-
+// part 2 - I recurse through the object and just delete any object that has "red". 
+// Then I use same strategy as I did in part 1 so that I don't have to recurse and evaluate numerical values.
 let obj = JSON.parse(input);
 
 const isObject = (obj) => {
   return Object.prototype.toString.call(obj) === "[object Object]";
 };
 
-const isArray = (obj) => {
-  return Object.prototype.toString.call(obj) === "[object Array]";
-};
-
 function recurse(obj) {
   // var can be object or array
 
   if (isObject(obj) && Object.values(obj).includes("red")) {
-    return false; // mark for deletion before
+    return true; // mark for deletion before evaluating the object any further.
   }
 
   for (let childKey in obj) {
@@ -40,7 +37,7 @@ function recurse(obj) {
       delete obj[childKey];
     }
   }
-  return true;
+  return false;
 }
 
 recurse(obj);
