@@ -3,86 +3,49 @@ const text = fs.readFileSync("input.txt").toString();
 
 const rounds = text.split("\r\n");
 
-const ROCK = 1;
-const PAPER = 2;
-const SCISSORS = 3;
+// We can convert these using character codes to normalize
+// This allows us to avoid a mapping
+function translateThem(char) {
+    return char.charCodeAt(0) - "A".charCodeAt(0);
+}
 
-const mapping = {
-    A: ROCK,
-    B: PAPER,
-    C: SCISSORS,
-    X: ROCK,
-    Y: PAPER,
-    Z: SCISSORS,
-};
+function translateMe(char) {
+    return char.charCodeAt(0) - "X".charCodeAt(0);
+}
 
+function normalize(round) {
+    const data = round.trim().split(" ");
+    return [translateThem(data[0]), translateMe(data[1])];
+}
+
+// Now that RPS is now normalized, we can now we use the fact that 1 < 2 < 3 to determine who wins, and use modulo arithmetic to determine the score
 function calcScore(them, me) {
-    let score = 0;
-    score += me;
-    if (me === them) {
-        score += 3;
-    } else if (me == ROCK && them == SCISSORS) {
-        score += 6;
-    } else if (me == PAPER && them == ROCK) {
-        score += 6;
-    } else if (me == SCISSORS && them == PAPER) {
-        score += 6;
-    }
-    return score;
+    //                             +----------- Determines our bonus based on the outcome (since it's a multiple of 3)
+    //                             |   +------- We always add our own play to the score
+    //                             |   |    +-- Because it was always off by one ¯\_(ツ)_/¯
+    //                             v   v    v
+    return ((me + 4 - them) % 3) * 3 + me + 1;
+    //       ^----------------^---------------- Determines the outcome (0 lose, 1 draw, 2 win).
 }
 
-scores = rounds.map((x) =>
-    calcScore(
-        ...x
-            .trim()
-            .split(" ")
-            .map((x) => mapping[x])
-    )
-);
-
-console.log(scores.reduce((a, b) => a + b, 0));
-
-function calcScore2(them, meOpCode) {
-    me = null;
-    if (meOpCode == PAPER) {
-        // draw, use the same one
-        me = them;
-    }
-    if (meOpCode == ROCK) {
-        // I need to lose
-        if (them == SCISSORS) {
-            me = PAPER;
-        }
-        if (them == ROCK) {
-            me = SCISSORS;
-        }
-        if (them == PAPER) {
-            me = ROCK;
-        }
-    }
-    if (meOpCode == SCISSORS) {
-        // I need to win
-        if (them == SCISSORS) {
-            me = ROCK;
-        }
-        if (them == ROCK) {
-            me = PAPER;
-        }
-        if (them == PAPER) {
-            me = SCISSORS;
-        }
-    }
-
-    return calcScore(them, me);
+// For this one, we take the same formula and switch out what the "unknown" is that we need to solve for. In this case, we know the outcome and so can plug that in
+// but now we don't know the "me" value and need to solve for that
+function calcScore2(them, outcome) {
+    //                    v----------------------v------ Determines what our play should be
+    return outcome * 3 + ((them + outcome + 2) % 3) + 1;
+    //     ^---------^ --------------------------------- Same as part 1, except this time outcome is already given to us
 }
 
-scores = rounds.map((x) =>
-    calcScore2(
-        ...x
-            .trim()
-            .split(" ")
-            .map((x) => mapping[x])
-    )
+console.log(
+    rounds
+        .map(normalize)
+        .map((x) => calcScore(...x))
+        .reduce((a, b) => a + b, 0)
 );
 
-console.log(scores.reduce((a, b) => a + b, 0));
+console.log(
+    rounds
+        .map(normalize)
+        .map((x) => calcScore2(...x))
+        .reduce((a, b) => a + b, 0)
+);
