@@ -8,41 +8,62 @@ const gridRotated = grid[0].map((_, colIndex) =>
     grid.map((row) => row[colIndex])
 );
 
-const rotatedCoords = (x, y) => [y, x];
-
 let innerVisible = 0;
 // only need to calc the inner-portions, hence starting at 1 and going to length-1
-for (let y = 1; y < grid.length - 1; y++) {
-    for (let x = 1; x < grid[y].length - 1; x++) {
-        console.log("=========");
+for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
         tree = grid[y][x];
-        const [rX, rY] = rotatedCoords(x, y);
-        console.log(tree);
+        // console.log("=====");
+        // console.log(tree);
         // check to see if it's visible from the x-axis
         const left = grid[y].slice(0, x);
         const right = grid[y].slice(x + 1);
 
         // use rotated grid to check y-axis
-        const top = gridRotated[rY].slice(0, rX);
-        const bottom = gridRotated[rY].slice(rX + 1);
+        const top = grid.slice(0, y).map((y) => y[x]);
+        const bottom = grid.slice(y + 1).map((y) => y[x]);
 
-        console.log(" left: ", !left.find((x) => x >= tree));
-        console.log(" right: ", !right.find((x) => x >= tree));
-        console.log(" top: ", !top.find((x) => x >= tree));
-        console.log(" bottom: ", !bottom.find((x) => x >= tree));
         if (
-            !left.find((x) => x >= tree) ||
-            !right.find((x) => x >= tree) ||
-            !top.find((x) => x >= tree) ||
-            !bottom.find((x) => x >= tree)
+            !left.some((x) => x >= tree) ||
+            !right.some((x) => x >= tree) ||
+            !top.some((x) => x >= tree) ||
+            !bottom.some((x) => x >= tree)
         ) {
             innerVisible += 1;
         }
     }
 }
-console.log(innerVisible);
-console.log(grid[0].length * 2 + gridRotated[0].length * 2 - 4);
-console.log(
-    "part 1:",
-    innerVisible + grid[0].length * 2 + gridRotated[0].length * 2 - 4
-);
+console.log("part 1:", innerVisible);
+
+function* takeWhile(fn, arr) {
+    for (let x of arr)
+        if (fn(x)) {
+            yield x;
+        } else {
+            yield x;
+            break;
+        }
+}
+
+let max = 0;
+for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+        tree = grid[y][x];
+        const left = grid[y].slice(0, x).reverse();
+        const right = grid[y].slice(x + 1);
+        const top = grid
+            .slice(0, y)
+            .map((y) => y[x])
+            .reverse();
+        const bottom = grid.slice(y + 1).map((y) => y[x]);
+
+        topScore = [...takeWhile((x) => x < tree, top)].length;
+        leftScore = [...takeWhile((x) => x < tree, left)].length;
+        rightScore = [...takeWhile((x) => x < tree, right)].length;
+        bottomScore = [...takeWhile((x) => x < tree, bottom)].length;
+
+        max = Math.max(max, topScore * leftScore * rightScore * bottomScore);
+    }
+}
+
+console.log("part 2: ", max);
