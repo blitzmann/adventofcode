@@ -22,12 +22,16 @@ for (let monkeyStr of monkeys) {
     });
 }
 
-for (let i = 0; i < 20; i++) {
+divisors = [...monkeyMap.values()].map((x) => x.test);
+trueDivisor = divisors.reduce((a, b) => a * b, 1);
+for (let i = 0; i < 10000; i++) {
     for (let monkey of monkeyMap.values()) {
         while (monkey.items.length > 0) {
             let old = monkey.items.shift();
             let newVal = eval(monkey.op);
-            newVal = Math.floor(newVal / 3);
+            // newVal = Math.floor(newVal / 3);
+            newVal = newVal % trueDivisor;
+
             let otherMonkey = monkeyMap.get(
                 newVal % monkey.test === 0
                     ? monkey.trueMonkey
