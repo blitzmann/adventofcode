@@ -5,19 +5,8 @@ const coords = text
     .split("\r\n")
     .map((x) => x.split("->").map((x) => x.split(",").map(Number)));
 
-console.log(coords);
 xValues = coords.map((x) => x.map((x) => x[0])).flat();
 yValues = coords.map((x) => x.map((x) => x[1])).flat();
-
-function makeArray(d1, d2) {
-    var arr = new Array(d1),
-        i,
-        l;
-    for (i = 0, l = d2; i < l; i++) {
-        arr[i] = new Array(d1);
-    }
-    return arr;
-}
 
 let field = new Map();
 
@@ -46,18 +35,27 @@ generatMap(coords);
 
 const maxY = Math.max(...[...field.values()].map((x) => x.y));
 
-function sandFall() {
+// hacky min / max setting, it's eventually going to be a triangle, hence using the max y and a buffer (+2 for part 2, and an extra buffer just ion case)
+const maxX = Math.max(...[...field.values()].map((x) => x.x)) + maxY + 3;
+const minX = Math.min(...[...field.values()].map((x) => x.x)) - maxY - 3;
+
+function sandFall(useFloor = false) {
     x = 500;
     y = 0;
-
     // todo: while (!isResting) ?
     while (true) {
-        if (y > maxY + 10) {
+        if (!useFloor && y > maxY) {
+            return false;
+        }
+        if (field.get("X500Y0")) {
             return false;
         }
         // check below.
+        let content;
+
         key = `X${x}Y${y + 1}`;
         content = field.get(key);
+
         if (!content) {
             // nothing below, keep falling
             y++;
@@ -84,4 +82,15 @@ function sandFall() {
 }
 
 while (sandFall() !== false) {}
+
+console.log([...field.values()].filter((x) => x.c === "o").length);
+
+// re-generate map
+field = new Map();
+generatMap(coords);
+for (let x = minX; x < maxX; x++) {
+    field.set(`X${x}Y${maxY + 2}`, { x, y, c: "#" });
+}
+while (sandFall(true) !== false) {}
+
 console.log([...field.values()].filter((x) => x.c === "o").length);
