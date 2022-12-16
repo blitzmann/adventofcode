@@ -16,37 +16,29 @@ for (let line of text.split("\r\n")) {
 }
 
 function part1(y) {
-    line = "";
-
     maxD = Math.max(...sensors.map((x) => x.distance));
     maxX = Math.max(...sensors.map((x) => x.sensor.x)) + maxD;
     minX = Math.min(...sensors.map((x) => x.sensor.x)) - maxD;
 
+    let num = 0;
     for (let x = minX; x < maxX; x++) {
-        data = sensors.map((s) => {
+        let isBlocked = sensors.some((s) => {
             distanceToSensor = manDistance(x, y, s.sensor.x, s.sensor.y);
             if (s.beacon.x === x && s.beacon.y === y) {
-                return null;
+                return false;
             }
             return s.distance >= distanceToSensor;
         });
-
-        if (data.some((x) => x === null)) {
-            line += "B";
-        } else if (data.some(Boolean)) {
-            line += "#";
-        } else {
-            line += ".";
-        }
-        // determine if we have
+        num += isBlocked ? 1 : 0;
     }
 
-    return line.split("").reduce((a, b) => (b === "#" ? a + 1 : a), 0);
+    return num;
 }
-console.time();
 
+console.time();
 console.log("part 1", part1(2000000));
 console.timeEnd();
+
 // part2 - calculate boundaries of signals, and check +1 for one that doesn't ahve anything else
 function* generatorPerimeter(point, d) {
     let [pX, pY] = point;
