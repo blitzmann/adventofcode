@@ -115,6 +115,20 @@ function getMaxY(column) {
     return Math.max(...[...column.values()].map((x) => x.y));
 }
 
+function convertColumnToSeq(column, tallestY) {
+    const seq = [];
+    for (let y = 1; y < tallestY; y++) {
+        for (x = 0; x < 7; x++) {
+            seq.push(
+                column.has(`X${x}Y${y}`)
+                    ? rocks.indexOf(column.get(`X${x}Y${y}`).rock) + 1
+                    : 0
+            );
+        }
+    }
+    return seq;
+}
+
 function printMap(reference) {
     for (y = getMaxY(column) + 5; y >= 0; y--) {
         let line = "";
@@ -131,7 +145,31 @@ function printMap(reference) {
     console.log();
 }
 
-for (let iRock = 0, tick = 0; iRock < 2022; iRock++) {
+function getSeqOfSeq(shortSeq, longSeq) {
+    let ret = [];
+    for (let i = 0; i < longSeq.length; i++) {
+        if (
+            longSeq.slice(i, i + shortSeq.length).toString() ===
+            shortSeq.toString()
+        ) {
+            ret.push([i, i + shortSeq.length]);
+        }
+    }
+    return ret;
+}
+
+function thing(seq) {
+    found = false;
+    for (let x = 1; x < seq.length; x++) {
+        if (seq.slice(-1 * x)[0] - seq.slice(-1 * x - 1)[1] > 0) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+for (let iRock = 0, tick = 0; iRock < 1000000000000; iRock++) {
     const rock = rocks[iRock % 5];
     let startingY = tallestY + 4; // leave 3 buffer between bottom of rock and top of column
     let reference = [2, startingY]; // reference point, this is what the wind will technically move, and we overlap the rock calcs utilizing this
@@ -148,6 +186,33 @@ for (let iRock = 0, tick = 0; iRock < 2022; iRock++) {
 
     if (floorCheck.length === 7) {
         console.log(reference);
+    }
+
+    if (iRock % 1000 === 0) {
+        const num = -(7 * 1000);
+        // every 100 rocks, we check for a sequence
+        const seq = convertColumnToSeq(column, tallestY);
+        const duplicates =
+            seq.toString().match(new RegExp(seq.slice(num).toString(), "g")) ||
+            []; // check for duplication of the last 1000 lines
+        if (duplicates.length >= 2) {
+            longSeq = seq.slice(-(7 * 2000));
+            for (let j = 1; ; j++) {
+                let shortSeq = longSeq.slice(j, -1);
+                let re = new RegExp(shortSeq.toString(), "g");
+                let matches = longSeq.toString().match(re);
+                if (matches.length !== 1) {
+                    while ((match = re.exec(longSeq.toString())) != null) {
+                        console.log("match found at " + match.index);
+                    }
+                    console.log("sfdsaa");
+                }
+                // test = getSeqOfSeq(shortSeq, longSeq);
+                // if (thing(test)) {
+                // }
+            }
+            console.log(duplicates);
+        }
     }
 
     true;
