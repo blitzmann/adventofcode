@@ -36,8 +36,8 @@ generatMap(coords);
 const maxY = Math.max(...[...field.values()].map((x) => x.y));
 
 // hacky min / max setting, it's eventually going to be a triangle, hence using the max y and a buffer (+2 for part 2, and an extra buffer just ion case)
-const maxX = Math.max(...[...field.values()].map((x) => x.x)) + maxY + 3;
-const minX = Math.min(...[...field.values()].map((x) => x.x)) - maxY - 3;
+const maxX = 500 + maxY + 3;
+const minX = 500 - maxY - 3;
 
 function sandFall(useFloor = false) {
     x = 500;

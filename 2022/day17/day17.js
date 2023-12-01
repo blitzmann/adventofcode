@@ -1,18 +1,6 @@
-const { dir } = require("console");
 const fs = require("fs");
 const directions = fs.readFileSync("input.txt").toString().split("");
-
-// lastTime = 0;
-// console.time(lastTime);
-// for (x = 0; x < 1000000000000; x++) {
-//     if (x % 100000000 === 0) {
-//         console.log(x);
-//         console.timeEnd(lastTime);
-//         lastTime = x;
-//         console.time(lastTime);
-//     }
-// }
-
+console.time();
 const rocks = [
     {
         shape: [[1, 1, 1, 1]],
@@ -109,24 +97,8 @@ function* generateRockPoints(reference, rock) {
     }
 }
 
-console.log([...generateCheckPoints([2, 0], rocks[4], "v")]);
-
 function getMaxY(column) {
     return Math.max(...[...column.values()].map((x) => x.y));
-}
-
-function convertColumnToSeq(column, tallestY) {
-    const seq = [];
-    for (let y = 1; y < tallestY; y++) {
-        for (x = 0; x < 7; x++) {
-            seq.push(
-                column.has(`X${x}Y${y}`)
-                    ? rocks.indexOf(column.get(`X${x}Y${y}`).rock) + 1
-                    : 0
-            );
-        }
-    }
-    return seq;
 }
 
 function printMap(reference) {
@@ -145,77 +117,16 @@ function printMap(reference) {
     console.log();
 }
 
-function getSeqOfSeq(shortSeq, longSeq) {
-    let ret = [];
-    for (let i = 0; i < longSeq.length; i++) {
-        if (
-            longSeq.slice(i, i + shortSeq.length).toString() ===
-            shortSeq.toString()
-        ) {
-            ret.push([i, i + shortSeq.length]);
-        }
-    }
-    return ret;
-}
+states = new Map();
+let addedHeight = 0;
 
-function thing(seq) {
-    found = false;
-    for (let x = 1; x < seq.length; x++) {
-        if (seq.slice(-1 * x)[0] - seq.slice(-1 * x - 1)[1] > 0) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-for (let iRock = 0, tick = 0; iRock < 1000000000000; iRock++) {
+const NUM_ROCKS = 1000000000000;
+for (let iRock = 0, tick = 0; iRock < NUM_ROCKS; iRock++) {
     const rock = rocks[iRock % 5];
     let startingY = tallestY + 4; // leave 3 buffer between bottom of rock and top of column
     let reference = [2, startingY]; // reference point, this is what the wind will technically move, and we overlap the rock calcs utilizing this
     // printMap(reference);
 
-    // part 2 test???
-    let floorCheck = [];
-    for (x = 0; x < 7; x++) {
-        data = column.get(`X${x}Y${tallestY}`);
-        if (data) {
-            floorCheck.push(data);
-        }
-    }
-
-    if (floorCheck.length === 7) {
-        console.log(reference);
-    }
-
-    if (iRock % 1000 === 0) {
-        const num = -(7 * 1000);
-        // every 100 rocks, we check for a sequence
-        const seq = convertColumnToSeq(column, tallestY);
-        const duplicates =
-            seq.toString().match(new RegExp(seq.slice(num).toString(), "g")) ||
-            []; // check for duplication of the last 1000 lines
-        if (duplicates.length >= 2) {
-            longSeq = seq.slice(-(7 * 2000));
-            for (let j = 1; ; j++) {
-                let shortSeq = longSeq.slice(j, -1);
-                let re = new RegExp(shortSeq.toString(), "g");
-                let matches = longSeq.toString().match(re);
-                if (matches.length !== 1) {
-                    while ((match = re.exec(longSeq.toString())) != null) {
-                        console.log("match found at " + match.index);
-                    }
-                    console.log("sfdsaa");
-                }
-                // test = getSeqOfSeq(shortSeq, longSeq);
-                // if (thing(test)) {
-                // }
-            }
-            console.log(duplicates);
-        }
-    }
-
-    true;
     for (; ; tick++) {
         let direction = directions[tick % directions.length];
         shiftBlocked = [...generateCheckPoints(reference, rock, direction)]
@@ -258,6 +169,33 @@ for (let iRock = 0, tick = 0; iRock < 1000000000000; iRock++) {
         }
         // printMap(reference);
     }
+
+    // State section, after every rock we determine which tick we're on, which rock, and what the top 10 rows look like
+    let state = `${tick % directions.length},${iRock % 5},`;
+    for (let y = tallestY; y >= tallestY - 10; y--) {
+        let rownum = "";
+        for (let x = 0; x < 7; x++) {
+            rownum += column.has(`X${x}Y${y}`) ? 1 : 0;
+        }
+        // binary!
+        state += parseInt(rownum, 2) + ",";
+    }
+
+    let prevState = states.get(state);
+    if (prevState) {
+        // we have a previous state match, which means we have a cycle. Use this to extrapolate
+        let rockDelta = iRock - prevState.count;
+        let heightDelta = tallestY - prevState.height;
+        let cycleAmount =
+            Math.floor((NUM_ROCKS - prevState.count) / rockDelta) - 1;
+
+        // don't change tallestY, because then the rock will start from there and will have to fall forever since we haven't actually calcuated all the in between.
+        addedHeight += cycleAmount * heightDelta;
+        iRock += cycleAmount * rockDelta;
+    } else {
+        states.set(state, { height: tallestY, count: iRock });
+    }
 }
 
-console.log(tallestY);
+console.log(tallestY + addedHeight);
+console.timeEnd();

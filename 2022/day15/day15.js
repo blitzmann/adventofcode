@@ -68,7 +68,7 @@ function checkPointWithinSensor(point) {
         return s.distance >= distanceToSensor;
     });
 }
-
+let yt = 0;
 function part2(maxBound) {
     max = maxBound;
     min = 0;
@@ -77,6 +77,7 @@ function part2(maxBound) {
             [s.sensor.x, s.sensor.y],
             s.distance + 1
         )) {
+            yt++;
             let [x, y] = coord;
 
             if (x < min || x > max || y < min || y > max) {
@@ -92,4 +93,5 @@ function part2(maxBound) {
 }
 console.time();
 console.log("Part2", part2(4000000));
+console.log(yt);
 console.timeEnd();
